@@ -27,6 +27,13 @@ namespace Celeste.Mod.Ghost {
 
         public bool ShowDeaths { get; set; } = false;
 
+        public bool ShowFastestOnly{ get; set; } = false;
+
+        [SettingRange(1, 20)]
+        public int ShowFastestLimit{ get; set; } = 3;
+
+        public bool AlternateColor { get; set; } = false;
+
         [SettingRange(0, 10)]
         public int InnerOpacity { get; set; } = 4;
         [YamlIgnore]

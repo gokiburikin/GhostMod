@@ -18,6 +18,7 @@ namespace Celeste.Mod.Ghost {
 
         public readonly static Color ColorGold = new Color(1f, 1f, 0f, 1f);
         public readonly static Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
+        public readonly static Color ColorDark= new Color(0.1f, 0.1f, 0.1f, 0.1f);
 
         public GhostManager(Player player, Level level)
             : base(Vector2.Zero) {
@@ -55,11 +56,20 @@ namespace Celeste.Mod.Ghost {
 
             // Gold is the easiest: Find fastest active ghost.
             Ghost fastest = null;
+            List<Ghost> validGhosts = Ghosts.Where(ghost => GhostModule.Settings.ShowDeaths == true || ghost.Data.Dead != true).ToList();
+            List<Ghost> frameSorted = validGhosts.OrderBy(ghost => ghost.Data.Frames.Count).ToList();
             foreach (Ghost ghost in Ghosts) {
                 // While we're at it, reset all colors.
-                ghost.Color = ColorNeutral;
+                if (GhostModule.Settings.AlternateColor)
+                {
+                    ghost.Color = ColorDark;
+                }
+                else
+                {
+                    ghost.Color = ColorNeutral;
+                }
 
-                if (!ghost.Frame.Data.IsValid)
+                if (!ghost.Frame.Data.IsValid || !validGhosts.Contains(ghost) )
                     continue;
                 
                 if (fastest == null || ghost.Data.Frames.Count < fastest.Data.Frames.Count) {
@@ -69,6 +79,24 @@ namespace Celeste.Mod.Ghost {
 
             if (fastest != null) {
                 fastest.Color = ColorGold;
+            }
+
+            if (GhostModule.Settings.ShowFastestOnly == true)
+            {
+                for (int i = 0; i < frameSorted.Count; i++)
+                {
+                    Ghost ghost = frameSorted[i];
+                    if (i < GhostModule.Settings.ShowFastestLimit)
+                    {
+                        ghost.Visible = true;
+                        ghost.Name.Visible = true;
+                    }
+                    else
+                    {
+                        ghost.Visible = false;
+                        ghost.Name.Visible = false;
+                    }
+                }
             }
 
             base.Render();
